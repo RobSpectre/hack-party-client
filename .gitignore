@@ -23,3 +23,5 @@ local.py
 coverage.xml
 .pytest_cache/
 config.local.js
+*.env.local
+npm-debug.log
