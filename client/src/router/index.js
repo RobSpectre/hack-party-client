@@ -3,6 +3,7 @@ import VueRouter from 'vue-router'
 
 import Ping from '../components/Ping.vue'
 import Player from '../components/Player.vue'
+import JoinGame from '../components/JoinGame.vue'
 
 Vue.use(VueRouter)
 
@@ -16,6 +17,11 @@ const routes = [
     path: '/player',
     name: 'Player',
     component: Player
+  },
+  {
+    path: '/join',
+    name: 'Join Game',
+    component: JoinGame
   }
 ]
 

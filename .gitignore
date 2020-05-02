@@ -22,3 +22,4 @@ local.py
 .tox/
 coverage.xml
 .pytest_cache/
+config.local.js

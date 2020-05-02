@@ -1,3 +1,28 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.primary-button {
+  @apply block text-center rounded-lg border border-transparent bg-green
+  px-4 py-2 text-base leading-6 font-semibold text-white transition ease-in-out duration-150
+  uppercase;
+}
+
+.primary-button:hover {
+  @apply text-white bg-orange transition ease-in-out duration-150
+}
+
+.secondary-button {
+  @apply block text-center rounded-lg border border-transparent bg-blue
+  px-4 py-2 text-base leading-6 font-semibold text-white transition ease-in-out duration-150
+  uppercase;
+}
+
+.secondary-button:hover {
+  @apply text-white bg-orange transition ease-in-out duration-150
+}
+
+.primary-button:active, .primary-button:focus, .secondary-button:active,
+.secondary-button:focus {
+  @apply border-none
+}
