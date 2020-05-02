@@ -5,7 +5,7 @@
         <div class="lg:w-0 lg:flex-1">
           <h2 class="text-3xl leading-9 font-extrabold tracking-tight text-white
             sm:text-4xl sm:leading-10 text-center">
-            {{ tokenUri }}
+            {{ playerName }}
           </h2>
         </div>
       </div>
