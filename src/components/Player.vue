@@ -10,14 +10,15 @@
         </div>
       </div>
     </div>
-    <div class="mx-auto py-12 px-4 sm:px-6 lg:py-16 lg:px-8
-      lg:flex lg:items-center justify-center">
+    <div class="max-w-screen-xl mx-auto py-12 px-4 sm:px-6 lg:py-16 lg:px-8
+      lg:flex lg:items-center text-center justify-center">
       <vue-slider v-model="slider"
                   direction="ttb"
                   :height="400"
                   :min="-3"
                   :max="3"
                   :interval="0.01"
+                  :dot-size="80"
                   style="display: inline-block">
       </vue-slider>
     </div>
@@ -74,13 +75,14 @@ export default {
       playerName: localStorage.getItem('playerName'),
       tokenUri: process.env.VUE_APP_TOKEN_URI,
       slider: 0,
+      lastSlider: 0,
       connected: false,
       error: false,
       syncClient: undefined,
       token: undefined,
       syncMessage: 'Connecting...',
       syncPlayer: undefined,
-      refreshRate: 500
+      refreshRate: 200
     }
   },
   mounted () {
@@ -146,20 +148,24 @@ export default {
         })
     },
     iterateClock () {
-      this.syncClient.map('WizdomOfCrowdzPlayers')
-        .then((map) => {
-          map.update([this.playerName], { slider: this.slider })
-            .then((updateResult) => {
-              console.log('Updating slider: ' + this.slider)
-            })
-            .catch((error) => {
-              this.error = true
-              this.syncMessage = 'Error updating slider: ' + error
-            })
-        }).catch((error) => {
-          this.error = true
-          this.syncMessage = 'Could not get game map: ' + error
-        })
+      if (this.lastSlider !== this.slider) {
+        this.syncClient.map('WizdomOfCrowdzPlayers')
+          .then((map) => {
+            map.update([this.playerName], { slider: this.slider })
+              .then((updateResult) => {
+                console.log('Updating slider: ' + this.slider)
+              })
+              .catch((error) => {
+                this.error = true
+                this.syncMessage = 'Error updating slider: ' + error
+              })
+          }).catch((error) => {
+            this.error = true
+            this.syncMessage = 'Could not get game map: ' + error
+          })
+
+        this.lastSlider = this.slider
+      }
 
       setTimeout(this.iterateClock,
         this.refreshRate)
