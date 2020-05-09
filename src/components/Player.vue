@@ -10,8 +10,8 @@
         </div>
       </div>
     </div>
-    <div class="max-w-screen-xl mx-auto py-12 px-4 sm:px-6 lg:py-16 lg:px-8
-      lg:flex lg:items-center text-center">
+    <div class="mx-auto py-12 px-4 sm:px-6 lg:py-16 lg:px-8
+      lg:flex lg:items-center justify-center">
       <vue-slider v-model="slider"
                   direction="ttb"
                   :height="400"
@@ -26,17 +26,20 @@
         <div class="p-2 rounded-lg bg-indigo-600 shadow-lg sm:p-3">
           <div class="flex items-center justify-between flex-wrap">
             <div class="w-0 flex-1 flex items-center">
-              <span v-if="error" class="flex p-2 rounded-lg bg-red-500">
+              <span v-if="error" class="flex p-2 rounded-lg bg-red-500"
+                    id="status">
                 <svg class="h-6 w-6 text-white" fill="currentColor" viewBox="0 0 24 24" width="24" height="24">
                   <path d="M12 22a10 10 0 1 1 0-20 10 10 0 0 1 0 20zm0-2a8 8 0 1 0 0-16 8 8 0 0 0 0 16zm-3.54-4.54a5 5 0 0 1 7.08 0 1 1 0 0 1-1.42 1.42 3 3 0 0 0-4.24 0 1 1 0 0 1-1.42-1.42zM9 11a1 1 0 1 1 0-2 1 1 0 0 1 0 2zm6 0a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" />
                 </svg>
               </span>
-              <span v-else-if="connected" class="flex p-2 rounded-lg bg-green">
+              <span v-else-if="connected" class="flex p-2 rounded-lg bg-green"
+                    id="status">
                 <svg class="h-6 w-6 text-white" fill="currentColor" viewBox="0 0 24 24" width="24" height="24">
                   <path d="M12 22a10 10 0 1 1 0-20 10 10 0 0 1 0 20zm0-2a8 8 0 1 0 0-16 8 8 0 0 0 0 16zm-3.54-4.46a1 1 0 0 1 1.42-1.42 3 3 0 0 0 4.24 0 1 1 0 0 1 1.42 1.42 5 5 0 0 1-7.08 0zM9 11a1 1 0 1 1 0-2 1 1 0 0 1 0 2zm6 0a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
                 </svg>
               </span>
-              <span v-else class="flex p-2 rounded-lg bg-orange">
+              <span v-else class="flex p-2 rounded-lg bg-orange"
+                    id="status">
                 <svg class="h-6 w-6 text-white" fill="currentColor" viewBox="0 0 24 24" width="24" height="24">
                   <path d="M12 22a10 10 0 1 1 0-20 10 10 0 0 1 0 20zm0-2a8 8 0 1 0 0-16 8 8 0 0 0 0 16zm-3.54-4.54a5 5 0 0 1 7.08 0 1 1 0 0 1-1.42 1.42 3 3 0 0 0-4.24 0 1 1 0 0 1-1.42-1.42zM9 11a1 1 0 1 1 0-2 1 1 0 0 1 0 2zm6 0a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" />
                 </svg>
@@ -68,7 +71,7 @@ export default {
   },
   data: function () {
     return {
-      playerName: this.$route.params.playerName,
+      playerName: localStorage.getItem('playerName'),
       tokenUri: process.env.VUE_APP_TOKEN_URI,
       slider: 0,
       connected: false,
@@ -76,7 +79,8 @@ export default {
       syncClient: undefined,
       token: undefined,
       syncMessage: 'Connecting...',
-      syncPlayer: undefined
+      syncPlayer: undefined,
+      refreshRate: 500
     }
   },
   mounted () {
@@ -127,6 +131,8 @@ export default {
               .then((updateResult) => {
                 this.connected = true
                 this.syncMessage = 'Connected.'
+
+                this.iterateClock()
               })
               .catch((error) => {
                 this.error = true
@@ -138,6 +144,25 @@ export default {
           this.error = true
           this.syncMessage = 'Error updating map. ' + error
         })
+    },
+    iterateClock () {
+      this.syncClient.map('WizdomOfCrowdzPlayers')
+        .then((map) => {
+          map.update([this.playerName], { slider: this.slider })
+            .then((updateResult) => {
+              console.log('Updating slider: ' + this.slider)
+            })
+            .catch((error) => {
+              this.error = true
+              this.syncMessage = 'Error updating slider: ' + error
+            })
+        }).catch((error) => {
+          this.error = true
+          this.syncMessage = 'Could not get game map: ' + error
+        })
+
+      setTimeout(this.iterateClock,
+        this.refreshRate)
     }
   }
 }

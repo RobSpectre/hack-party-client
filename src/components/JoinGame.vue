@@ -50,6 +50,8 @@ export default {
         return
       }
 
+      localStorage.setItem('playerName', this.playerName)
+
       this.$router.push({
         name: 'Player',
         params: {
