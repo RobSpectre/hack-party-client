@@ -15,8 +15,8 @@
       <vue-slider v-model="slider"
                   direction="ttb"
                   :height="400"
-                  :min="-3"
-                  :max="3"
+                  :min="0"
+                  :max="1"
                   :interval="0.01"
                   :dot-size="80"
                   style="display: inline-block">
@@ -74,7 +74,7 @@ export default {
     return {
       playerName: localStorage.getItem('playerName'),
       tokenUri: process.env.VUE_APP_TOKEN_URI,
-      slider: 0,
+      slider: 0.5,
       lastSlider: 0,
       connected: false,
       error: false,
