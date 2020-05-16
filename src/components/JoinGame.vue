@@ -37,6 +37,8 @@
 </template>
 
 <script>
+import { mapMutations } from 'vuex'
+
 export default {
   name: 'JoinGame',
   data: function () {
@@ -50,7 +52,7 @@ export default {
         return
       }
 
-      localStorage.setItem('playerName', this.playerName)
+      this.setPlayerName(this.playerName)
 
       this.$router.push({
         name: 'Player',
@@ -58,7 +60,8 @@ export default {
           playerName: this.playerName
         }
       })
-    }
+    },
+    ...mapMutations(['setPlayerName'])
   }
 }
 </script>

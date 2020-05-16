@@ -5,10 +5,13 @@
 </template>
 
 <script>
+import store from './store'
+
 import './main.css'
 
 export default {
-  name: 'App'
+  name: 'WizePlayer',
+  store
 }
 </script>
 

@@ -5,23 +5,13 @@
         <div class="lg:w-0 lg:flex-1">
           <h2 class="text-3xl leading-9 font-extrabold tracking-tight text-white
             sm:text-4xl sm:leading-10 text-center">
-            {{ playerName }}
+            {{ player.name }}
           </h2>
         </div>
       </div>
     </div>
-    <div class="max-w-screen-xl mx-auto py-12 px-4 sm:px-6 lg:py-16 lg:px-8
-      lg:flex lg:items-center text-center justify-center">
-      <vue-slider v-model="slider"
-                  direction="ttb"
-                  :height="400"
-                  :min="0"
-                  :max="1"
-                  :interval="0.01"
-                  :dot-size="80"
-                  style="display: inline-block">
-      </vue-slider>
-    </div>
+    <slider :refreshRate="refreshRate"
+            @value-changed="handleValueChanged"></slider>
     <div class="fixed bottom-0 inset-x-0 pb-2 sm:pb-5">
       <div class="max-w-screen-xl mx-auto px-2 sm:px-6 lg:px-8">
         <div class="p-2 rounded-lg bg-indigo-600 shadow-lg sm:p-3">
@@ -59,23 +49,22 @@
 </template>
 
 <script>
+import { mapState, mapMutations } from 'vuex'
+
 import SyncClient from 'twilio-sync'
 
 import axios from 'axios'
 
-import VueSlider from 'vue-slider-component'
+import Slider from './Slider.vue'
 
 export default {
   name: 'Player',
   components: {
-    VueSlider
+    Slider
   },
   data: function () {
     return {
-      playerName: localStorage.getItem('playerName'),
       tokenUri: process.env.VUE_APP_TOKEN_URI,
-      slider: 0.5,
-      lastSlider: 0,
       connected: false,
       error: false,
       syncClient: undefined,
@@ -87,10 +76,10 @@ export default {
   },
   mounted () {
     axios.post(this.tokenUri, {
-      identity: this.playerName
+      identity: this.player.name
     })
       .then((response) => {
-        this.connectedToSync(response)
+        this.connectToSync(response)
       })
       .catch((error) => {
         this.error = true
@@ -98,8 +87,11 @@ export default {
         console.log(error)
       })
   },
+  computed: {
+    ...mapState(['game', 'player', 'sync'])
+  },
   methods: {
-    connectedToSync (response) {
+    connectToSync (response) {
       this.sync_message = 'Token retrieved...'
       this.syncClient = new SyncClient(response.data.token)
       this.token = response.data.token
@@ -128,13 +120,11 @@ export default {
             console.log('New update received: ' + event)
           })
 
-          if (this.playerName) {
-            map.update([this.playerName], { slider: this.slider })
+          if (this.player.name) {
+            map.update([this.player.name], { value: this.player.value })
               .then((updateResult) => {
                 this.connected = true
                 this.syncMessage = 'Connected.'
-
-                this.iterateClock()
               })
               .catch((error) => {
                 this.error = true
@@ -147,13 +137,15 @@ export default {
           this.syncMessage = 'Error updating map. ' + error
         })
     },
-    iterateClock () {
-      if (this.lastSlider !== this.slider) {
+    handleValueChanged (value) {
+      if (this.syncClient !== undefined) {
+        this.setPlayerValue(value)
+
         this.syncClient.map('WizdomOfCrowdzPlayers')
           .then((map) => {
-            map.update([this.playerName], { slider: this.slider })
+            map.update([this.player.name], { value: value })
               .then((updateResult) => {
-                console.log('Updating slider: ' + this.slider)
+                console.log('Updating slider: ' + value)
               })
               .catch((error) => {
                 this.error = true
@@ -163,15 +155,9 @@ export default {
             this.error = true
             this.syncMessage = 'Could not get game map: ' + error
           })
-
-        this.lastSlider = this.slider
       }
-
-      setTimeout(this.iterateClock,
-        this.refreshRate)
-    }
+    },
+    ...mapMutations(['setPlayerValue'])
   }
 }
 </script>
-
-<style src="../../node_modules/vue-slider-component/theme/material.css"></style>
