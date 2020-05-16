@@ -37,7 +37,7 @@ export default {
   methods: {
     iterateClock () {
       if (this.lastSlider !== this.slider) {
-        this.$emit('value-changed', this.slider)
+        this.$emit('change-value', this.slider)
         this.lastSlider = this.slider
       }
 

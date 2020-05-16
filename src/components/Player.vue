@@ -12,7 +12,12 @@
     </div>
     <slider v-if="controller === 'Slider'"
             :refreshRate="refreshRate"
-            @value-changed="handleValueChanged"></slider>
+            @change-value="handleValueChanged"></slider>
+    <multiple-choice v-if="controller === 'MultipleChoice'"
+                     :choices="choices"
+                     @change-value="handleValueChanged"></multiple-choice>
+    <h1 v-if="!controller" class="mx-auto font-semibold uppercase text-3xl
+      mt-12 text-center">Stay tuned for brain-exploding content.</h1>
     <div class="fixed bottom-0 inset-x-0 pb-2 sm:pb-5">
       <div class="max-w-screen-xl mx-auto px-2 sm:px-6 lg:px-8">
         <div class="p-2 rounded-lg bg-indigo-600 shadow-lg sm:p-3">
@@ -57,11 +62,13 @@ import SyncClient from 'twilio-sync'
 import axios from 'axios'
 
 import Slider from './Slider.vue'
+import MultipleChoice from './MultipleChoice.vue'
 
 export default {
   name: 'Player',
   components: {
-    Slider
+    Slider,
+    MultipleChoice
   },
   data: function () {
     return {
@@ -74,6 +81,7 @@ export default {
       syncPlayer: undefined,
       controller: undefined,
       value: undefined,
+      choices: [],
       refreshRate: 200
     }
   },
@@ -123,13 +131,10 @@ export default {
 
             console.log('New update received: ')
             console.log(event)
-
-            if (event.item.key === 'controller') {
-              this.changeController(event)
-            }
           })
 
           if (this.player.name) {
+            console.log('Firing.')
             map.update([this.player.name], { value: this.player.value })
               .then((updateResult) => {
                 this.connected = true
@@ -145,16 +150,37 @@ export default {
           this.error = true
           this.syncMessage = 'Error updating map. ' + error
         })
+
+      this.syncClient.map('WizdomOfCrowdz')
+        .then((map) => {
+          map.on('itemUpdated', (event) => {
+            this.connected = true
+            this.syncMessage = 'Connected'
+
+            if (event.item.key === 'controller') {
+              this.changeController(event)
+            }
+
+            if (event.item.key === 'choices') {
+              this.changeChoices(event)
+            }
+          })
+        })
+        .catch((error) => {
+          this.error = true
+          this.syncMessage = 'Error updating map. ' + error
+        })
     },
     handleValueChanged (value) {
       if (this.syncClient !== undefined) {
+        console.log('Sending new change: ' + value)
         this.setPlayerValue(value)
 
         this.syncClient.map('WizdomOfCrowdzPlayers')
           .then((map) => {
             map.update([this.player.name], { value: value })
               .then((updateResult) => {
-                console.log('Sending updated slider: ' + value)
+                console.log('Sending updated player value: ' + value)
               })
               .catch((error) => {
                 this.error = true
@@ -168,6 +194,9 @@ export default {
     },
     changeController (event) {
       this.controller = event.item.value.value
+    },
+    changeChoices (event) {
+      this.choices = event.item.value.value
     },
     ...mapMutations(['setPlayerValue'])
   }
