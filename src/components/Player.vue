@@ -10,7 +10,8 @@
         </div>
       </div>
     </div>
-    <slider :refreshRate="refreshRate"
+    <slider v-if="controller === 'Slider'"
+            :refreshRate="refreshRate"
             @value-changed="handleValueChanged"></slider>
     <div class="fixed bottom-0 inset-x-0 pb-2 sm:pb-5">
       <div class="max-w-screen-xl mx-auto px-2 sm:px-6 lg:px-8">
@@ -71,6 +72,8 @@ export default {
       token: undefined,
       syncMessage: 'Connecting...',
       syncPlayer: undefined,
+      controller: undefined,
+      value: undefined,
       refreshRate: 200
     }
   },
@@ -114,10 +117,16 @@ export default {
     connectToSyncPlayer () {
       this.syncClient.map('WizdomOfCrowdzPlayers')
         .then((map) => {
-          map.on('updated', function (event) {
+          map.on('itemUpdated', (event) => {
             this.connected = true
             this.syncMessage = 'Connected'
-            console.log('New update received: ' + event)
+
+            console.log('New update received: ')
+            console.log(event)
+
+            if (event.item.key === 'controller') {
+              this.changeController(event)
+            }
           })
 
           if (this.player.name) {
@@ -145,7 +154,7 @@ export default {
           .then((map) => {
             map.update([this.player.name], { value: value })
               .then((updateResult) => {
-                console.log('Updating slider: ' + value)
+                console.log('Sending updated slider: ' + value)
               })
               .catch((error) => {
                 this.error = true
@@ -156,6 +165,9 @@ export default {
             this.syncMessage = 'Could not get game map: ' + error
           })
       }
+    },
+    changeController (event) {
+      this.controller = event.item.value.value
     },
     ...mapMutations(['setPlayerValue'])
   }
