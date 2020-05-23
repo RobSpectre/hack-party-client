@@ -32,6 +32,9 @@ const mutations = {
   },
   setPlayerScore (state, score) {
     state.player.score = score
+  },
+  changePlayerAttribute (state, payload) {
+    state.player[payload.attribute] = payload.value
   }
 }
 

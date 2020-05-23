@@ -1,6 +1,16 @@
 <template>
   <div>
-    <div class="bg-darkgray">
+    <div v-if="player.color" :style="{backgroundColor: player.color}">
+      <div class="max-w-screen-xl mx-auto py-12 px-4 sm:px-6 lg:py-16 lg:px-8 lg:flex lg:items-center">
+        <div class="lg:w-0 lg:flex-1">
+          <h2 class="text-3xl leading-9 font-extrabold tracking-tight text-white
+            sm:text-4xl sm:leading-10 text-center">
+            {{ player.name }}
+          </h2>
+        </div>
+      </div>
+    </div>
+    <div v-else class="bg-darkgray">
       <div class="max-w-screen-xl mx-auto py-12 px-4 sm:px-6 lg:py-16 lg:px-8 lg:flex lg:items-center">
         <div class="lg:w-0 lg:flex-1">
           <h2 class="text-3xl leading-9 font-extrabold tracking-tight text-white
@@ -134,7 +144,6 @@ export default {
           })
 
           if (this.player.name) {
-            console.log('Firing.')
             map.update([this.player.name], { value: this.player.value })
               .then((updateResult) => {
                 this.connected = true
@@ -163,6 +172,10 @@ export default {
 
             if (event.item.key === 'choices') {
               this.changeChoices(event)
+            }
+
+            if (event.item.key === 'updatePlayer') {
+              this.updatePlayer(event)
             }
           })
         })
@@ -198,7 +211,14 @@ export default {
     changeChoices (event) {
       this.choices = event.item.value.value
     },
-    ...mapMutations(['setPlayerValue'])
+    updatePlayer (event) {
+      const payload = event.item.value.value
+
+      if (payload.name === this.player.name) {
+        this.changePlayerAttribute(payload.payload)
+      }
+    },
+    ...mapMutations(['setPlayerValue', 'changePlayerAttribute'])
   }
 }
 </script>
