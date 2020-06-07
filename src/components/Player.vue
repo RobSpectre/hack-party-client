@@ -20,13 +20,13 @@
         </div>
       </div>
     </div>
-    <slider v-if="controller === 'Slider'"
+    <slider v-if="player.controller.type === 'Slider'"
             :refreshRate="refreshRate"
             @change-value="handleValueChanged"></slider>
-    <multiple-choice v-if="controller === 'MultipleChoice'"
-                     :choices="choices"
+    <multiple-choice v-if="player.controller.type === 'MultipleChoice'"
+                     :choices="player.controller.options"
                      @change-value="handleValueChanged"></multiple-choice>
-    <h1 v-if="!controller" class="mx-auto font-semibold uppercase text-3xl
+    <h1 v-if="!player.controller.type" class="mx-auto font-semibold uppercase text-3xl
       mt-12 text-center">Stay tuned for brain-exploding content.</h1>
     <div class="fixed bottom-0 inset-x-0 pb-2 sm:pb-5">
       <div class="max-w-screen-xl mx-auto px-2 sm:px-6 lg:px-8">
@@ -90,7 +90,6 @@ export default {
       syncMessage: 'Connecting...',
       syncPlayer: undefined,
       controller: undefined,
-      value: undefined,
       choices: [],
       refreshRate: 200
     }
@@ -141,10 +140,14 @@ export default {
 
             console.log('New update received: ')
             console.log(event)
+
+            if (event.item.key === this.player.name) {
+              this.handleUpdatePlayer(event)
+            }
           })
 
           if (this.player.name) {
-            map.update([this.player.name], { value: this.player.value })
+            map.update([this.player.name], { value: this.player })
               .then((updateResult) => {
                 this.connected = true
                 this.syncMessage = 'Connected.'
@@ -159,30 +162,6 @@ export default {
           this.error = true
           this.syncMessage = 'Error updating map. ' + error
         })
-
-      this.syncClient.map('WizdomOfCrowdz')
-        .then((map) => {
-          map.on('itemUpdated', (event) => {
-            this.connected = true
-            this.syncMessage = 'Connected'
-
-            if (event.item.key === 'controller') {
-              this.changeController(event)
-            }
-
-            if (event.item.key === 'choices') {
-              this.changeChoices(event)
-            }
-
-            if (event.item.key === 'updatePlayer') {
-              this.updatePlayer(event)
-            }
-          })
-        })
-        .catch((error) => {
-          this.error = true
-          this.syncMessage = 'Error updating map. ' + error
-        })
     },
     handleValueChanged (value) {
       if (this.syncClient !== undefined) {
@@ -191,13 +170,15 @@ export default {
 
         this.syncClient.map('WizdomOfCrowdzPlayers')
           .then((map) => {
-            map.update([this.player.name], { value: value })
+            map.update([this.player.name], this.player)
               .then((updateResult) => {
-                console.log('Sending updated player value: ' + value)
+                console.log(this.player)
+                console.log('Sending updated player controller: ')
+                console.log(this.player.controller)
               })
               .catch((error) => {
                 this.error = true
-                this.syncMessage = 'Error updating slider: ' + error
+                this.syncMessage = 'Error updating controller: ' + error
               })
           }).catch((error) => {
             this.error = true
@@ -205,20 +186,14 @@ export default {
           })
       }
     },
-    changeController (event) {
-      this.controller = event.item.value.value
-    },
-    changeChoices (event) {
-      this.choices = event.item.value.value
-    },
-    updatePlayer (event) {
-      const payload = event.item.value.value
+    handleUpdatePlayer (event) {
+      console.log('Received update for this player:')
+      console.log(event.item.value)
 
-      if (payload.name === this.player.name) {
-        this.changePlayerAttribute(payload.payload)
-      }
+      const payload = event.item.value.value
+      this.changePlayerState(payload)
     },
-    ...mapMutations(['setPlayerValue', 'changePlayerAttribute'])
+    ...mapMutations(['setPlayerValue', 'changePlayerState'])
   }
 }
 </script>

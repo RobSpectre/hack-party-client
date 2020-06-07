@@ -7,7 +7,16 @@ Vue.use(Vuex)
 
 const state = {
   game: {},
-  player: {},
+  player: {
+    name: '',
+    color: '',
+    score: 0,
+    controller: {
+      type: undefined,
+      value: 0,
+      options: []
+    }
+  },
   sync: {
     message: '',
     token: undefined,
@@ -25,7 +34,7 @@ const mutations = {
     state.player.name = name
   },
   setPlayerValue (state, value) {
-    state.player.value = value
+    state.player.controller.value = value
   },
   setPlayerColor (state, color) {
     state.player.color = color
@@ -33,8 +42,8 @@ const mutations = {
   setPlayerScore (state, score) {
     state.player.score = score
   },
-  changePlayerAttribute (state, payload) {
-    state.player[payload.attribute] = payload.value
+  changePlayerState (state, payload) {
+    state.player = Object.assign(state.player, payload)
   }
 }
 
