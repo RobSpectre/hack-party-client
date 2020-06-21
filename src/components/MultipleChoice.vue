@@ -21,7 +21,11 @@ export default {
   },
   computed: {
     unchosenOptions () {
-      return this.choices.filter(choice => choice !== this.player.controller.value)
+      if (this.choices !== undefined) {
+        return this.choices.filter(choice => choice !== this.player.controller.value)
+      } else {
+        return []
+      }
     },
     ...mapState(['player'])
   },

@@ -147,7 +147,7 @@ export default {
           })
 
           if (this.player.name) {
-            map.update([this.player.name], { value: this.player })
+            map.update([this.player.name], this.player)
               .then((updateResult) => {
                 this.connected = true
                 this.syncMessage = 'Connected.'
@@ -172,9 +172,8 @@ export default {
           .then((map) => {
             map.update([this.player.name], this.player)
               .then((updateResult) => {
+                console.log('Sending updated player state:')
                 console.log(this.player)
-                console.log('Sending updated player controller: ')
-                console.log(this.player.controller)
               })
               .catch((error) => {
                 this.error = true
@@ -190,7 +189,7 @@ export default {
       console.log('Received update for this player:')
       console.log(event.item.value)
 
-      const payload = event.item.value.value
+      const payload = event.item.value
       this.changePlayerState(payload)
     },
     ...mapMutations(['setPlayerValue', 'changePlayerState'])
