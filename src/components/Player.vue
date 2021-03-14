@@ -91,7 +91,7 @@ export default {
       syncPlayer: undefined,
       controller: undefined,
       choices: [],
-      refreshRate: 200
+      refreshRate: 500
     }
   },
   mounted () {
@@ -113,6 +113,7 @@ export default {
   methods: {
     connectToSync (response) {
       this.sync_message = 'Token retrieved...'
+      console.log(response.data.token)
       this.syncClient = new SyncClient(response.data.token)
       this.token = response.data.token
 
