@@ -1,24 +1,15 @@
-<template>
-  <div class="max-w-screen-xl mx-auto py-12 px-4 sm:px-6 lg:py-16 lg:px-8
-    flex flex-auto flex-col items-center text-center justify-center">
-    <button v-for="choice in this.unchosenOptions" :key="choice.label"
-              type="button"
-              class="secondary-button my-5"
-              @click="selectChoice(choice)">{{ choice }}</button>
-      <h2 v-if="choices === undefined || choices.length === 0">Hang tight - shit is about to get real.</h2>
-  </div>
+<template lang='pug'>
+.max-w-screen-xl.mx-auto.py-12.px-4.flex.flex-auto.flex-col.items-center.text-center.justify-center(class='sm:px-6 lg:py-16 lg:px-8')
+  button.secondary-button.my-5(v-for='choice in this.unchosenOptions' :key='choice.label' type='button' @click='selectChoice(choice)') {{ choice }}
+  h2(v-if='choices === undefined || choices.length === 0') Hang tight - shizzle is about to get real.
 </template>
 
 <script>
-import { mapState } from 'vuex'
+import { mapState, mapActions } from 'pinia'
+import { useGameStore } from '@/store'
 
 export default {
   name: 'MultipleChoice',
-  data: function () {
-    return {
-      value: undefined
-    }
-  },
   computed: {
     unchosenOptions () {
       if (this.choices !== undefined) {
@@ -27,15 +18,15 @@ export default {
         return []
       }
     },
-    ...mapState(['player'])
+    ...mapState(useGameStore, ['player'])
   },
   props: [
     'choices'
   ],
   methods: {
+    ...mapActions(useGameStore, ['setPlayerValue']),
     selectChoice (value) {
-      this.value = value
-      this.$emit('change-value', value)
+      this.setPlayerValue(value)
     }
   }
 }

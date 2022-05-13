@@ -1,18 +1,9 @@
-import Vue from 'vue'
-import VueRouter from 'vue-router'
+import { createRouter, createWebHistory } from 'vue-router'
 
-import Ping from '../components/Ping.vue'
 import Player from '../components/Player.vue'
 import JoinGame from '../components/JoinGame.vue'
 
-Vue.use(VueRouter)
-
 const routes = [
-  {
-    path: '/ping',
-    name: 'Ping',
-    component: Ping
-  },
   {
     path: '/player',
     name: 'Player',
@@ -25,10 +16,11 @@ const routes = [
   }
 ]
 
-const router = new VueRouter({
-  mode: 'history',
-  base: process.env.BASE_URL,
+const router = createRouter({
+  history: createWebHistory(),
   routes
 })
+
+export { routes }
 
 export default router

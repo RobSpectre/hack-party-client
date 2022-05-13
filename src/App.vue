@@ -1,19 +1,12 @@
-<template>
-  <div id="app">
-    <router-view/>
-  </div>
+<template lang='pug'>
+#app(class='flex flex-col')
+  router-view
 </template>
 
 <script>
-import store from './store'
-
-import './main.css'
-
 export default {
-  name: 'WizePlayer',
-  store
+  name: 'HackPartyIndex'
 }
 </script>
 
-<style>
-</style>
+<style src='./main.css'></style>
